@@ -1,26 +1,665 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Design tokens. The reference site is a pastel blue / lavender world
+   with a cobalt accent. NeuroAtlas uses a mint / peach / sand world
+   with a deep teal accent and an apricot "highlight" for active regions.
+------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #dcefe8;
+  --ink: #16302b;
+  --ink-soft: rgba(22, 48, 43, 0.62);
+  --brand: #0b7a6a;
+  --brand-ink: #075c50;
+  --brand-glow: #7fd6c2;
+  --accent: #f2843b;
+  --accent-soft: #ffb98a;
+  --white: #ffffff;
+
+  --blob-1: #a9dccb;
+  --blob-2: #ffd3bf;
+  --blob-3: #f6e7a6;
+  --blob-4: #cfe9ff;
+
+  --font-jakarta: "Plus Jakarta Sans";
+  --font-ubuntu-mono: "Ubuntu Mono";
+
+  --radius-pill: 9999px;
+  --ease-io: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-glow: var(--brand-glow);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-ubuntu-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  background: var(--bg);
+}
+html,
+body {
+  height: 100%;
+  /* body stays transparent so the fixed, negative z-index Background shows */
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Typography helpers (mirrors the reference's text-* utils) ---------- */
+.t-mono-13 {
+  font-family: var(--font-ubuntu-mono), ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.19em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.t-mono-12 {
+  font-family: var(--font-ubuntu-mono), ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.t-mono-11 {
+  font-family: var(--font-ubuntu-mono), ui-monospace, monospace;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+/* ---------- Glass surfaces ---------- */
+.glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.glass-strong {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.38));
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* The iridescent blurred blob that appears on hover across the reference UI. */
+.hover-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 98px;
+  height: 98px;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(10px);
+  mix-blend-mode: multiply;
+  transition: opacity 0.3s ease-in-out;
+  background: linear-gradient(
+    226.74deg,
+    #e3f6ef 14.97%,
+    #c3efe2 20.41%,
+    #fff3ea 29.94%,
+    #ffe2cf 38.78%,
+    #ffffff 46.6%,
+    #d9f2ea 57.14%,
+    #ffffff 66.33%,
+    #fff0d6 70.41%,
+    #e3f6ef 77.89%
+  );
+}
+
+/* ---------- Keyframes ported from the reference ---------- */
+@keyframes pulseCircle {
+  0% {
+    opacity: 1;
+    transform: scale(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+@keyframes pulseBorder {
+  0% {
+    opacity: 0.8;
+    transform: scale(1.4);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+@keyframes pulseButton {
+  0% {
+    opacity: 0;
+    transform: scaleX(1) scaleY(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1.1) scaleY(1.2);
+  }
+  to {
+    opacity: 0;
+    transform: scaleX(1.2) scaleY(1.3);
+  }
+}
+@keyframes pulseLogo {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes pulseLogoBorder {
+  0% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.9);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.5);
+  }
+}
+@keyframes pulseBlur {
+  0% {
+    filter: blur(20px);
+    transform: scale(2);
+  }
+  50% {
+    filter: blur(15px);
+    transform: scale(2.5);
+  }
+  to {
+    filter: blur(20px);
+    transform: scale(2);
+  }
+}
+@keyframes rotateVFX {
+  0% {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(-1turn);
+  }
+}
+@keyframes moveLeft {
+  0% {
+    opacity: 1;
+    transform: translate(0) scale(1);
+  }
+  to {
+    opacity: 0.5;
+    transform: translate(-17px) scale(0.4);
+  }
+}
+@keyframes moveRight {
+  0% {
+    opacity: 1;
+    transform: translate(0) scale(1);
+  }
+  to {
+    opacity: 0.5;
+    transform: translate(17px) scale(0.4);
+  }
+}
+@keyframes shine {
+  to {
+    background-position: 200%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---------- Start button ---------- */
+.start-button .pulse,
+.start-button .pulse::before {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.start-button .pulse::before {
+  content: "";
+  border: 1px solid rgba(11, 122, 106, 0.55);
+  animation: pulseButton 1.5s linear infinite;
+  will-change: transform, opacity;
+}
+.start-button:hover .hover-gradient {
+  opacity: 1;
+}
+.start-button .main,
+.start-button .sub {
+  display: inline-block;
+  transition: transform 0.3s var(--ease-io), color 0.3s var(--ease-io);
+}
+.start-button .sub {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(20px);
+  color: var(--brand);
+}
+.start-button:hover .main {
+  transform: translateY(-20px);
+}
+.start-button:hover .sub {
+  transform: translateY(0);
+}
+
+/* ---------- Explore-mode hotspot (the "circulo") ---------- */
+.circulo-contenedor {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-io);
+}
+.circulo-contenedor::before,
+.circulo-contenedor::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 0.6px solid rgba(255, 255, 255, 0.4);
+  width: 50px;
+  height: 50px;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.circulo-contenedor::after {
+  width: 64px;
+  height: 64px;
+  opacity: 0;
+}
+.circulo-contenedor:hover::before {
+  width: 64px;
+  height: 64px;
+  opacity: 0.4;
+}
+.circulo-contenedor:hover::after {
+  width: 84px;
+  height: 84px;
+  opacity: 0.2;
+}
+.circulo-principal {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  z-index: 10;
+  transition: transform 0.4s var(--ease-back);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+}
+.circulo-principal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, #e3f6ef, #c3efe2, #fff3ea, #ffe2cf, #fff, #d9f2ea, #fff0d6);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.circulo-contenedor:hover .circulo-principal {
+  transform: scale(1.2);
+}
+.glow-bg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--brand-glow) 0, rgba(127, 214, 194, 0) 70%);
+  opacity: 1;
+  z-index: 5;
+  transition: opacity 0.4s;
+}
+.circulo-contenedor:hover .glow-bg {
+  opacity: 0.2;
+}
+.punto {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+  transition: all 0.4s var(--ease-back);
+  z-index: 11;
+}
+.punto:nth-child(2),
+.punto:nth-child(3) {
+  opacity: 0;
+}
+.circulo-contenedor:hover .punto:first-child {
+  width: 4px;
+  height: 4px;
+  transform: translate(-50%, -5px);
+}
+.circulo-contenedor:hover .punto:nth-child(2) {
+  opacity: 1;
+  transform: translate(calc(-50% - 4px), calc(4px - 50%));
+}
+.circulo-contenedor:hover .punto:nth-child(3) {
+  opacity: 1;
+  transform: translate(calc(4px - 50%), calc(4px - 50%));
+}
+
+/* ---------- Category-mode labeled hotspot ---------- */
+.hotspot {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 57px;
+  padding-right: 24px;
+  border-radius: 28px;
+  cursor: pointer;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transform: translate(-28.5px, -50%);
+  transition: opacity 0.3s ease-in-out;
+}
+.hotspot .circle {
+  position: relative;
+  flex: 0 0 57px;
+  width: 57px;
+  height: 57px;
+  margin-right: 24px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+  transition: 0.3s ease-in-out;
+}
+.hotspot .circle::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translate(-50%, -50%);
+}
+.hotspot .circle::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  display: none;
+  animation: pulseCircle 1.5s infinite;
+}
+.hotspot .circle .vfx {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.7);
+  animation: rotateVFX 10s linear infinite;
+}
+.hotspot p {
+  flex-grow: 1;
+  font-weight: 600;
+  font-size: 16px;
+  white-space: nowrap;
+  transition: color 0.3s ease-in-out;
+}
+.hotspot .arrow {
+  width: 1px;
+  margin-left: 1px;
+  opacity: 0;
+  transition: 0.3s ease-in-out;
+}
+.hotspot:hover .arrow {
+  width: 9px;
+  margin-left: 17px;
+  opacity: 1;
+}
+.hotspot:hover .circle {
+  background-color: var(--brand);
+}
+.hotspot:hover .circle::after {
+  display: block;
+}
+.hotspot:hover .hover-gradient {
+  opacity: 0.8;
+}
+.hotspot:hover p {
+  color: var(--brand);
+}
+
+/* On phones the labelled hotspot stacks: circle on top, small white label below
+   (same as the reference's mobile layout). */
+@media (max-width: 1023px) {
+  .hotspot {
+    flex-direction: column;
+    height: auto;
+    padding-right: 0;
+    background: transparent;
+    backdrop-filter: none;
+    border: 0;
+    transform: translate(-50%, -25%);
+  }
+  .hotspot,
+  .hotspot.alt {
+    transform: translate(-50%, -50%);
+  }
+  .hotspot .circle {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+    margin: 0;
+  }
+  /* On phones the labels move to the chip strip above the bottom bar;
+     the brain keeps only the circles so nothing overlaps. */
+  .hotspot p,
+  .hotspot .arrow,
+  .hotspot .hover-gradient {
+    display: none;
+  }
+  .story-sheet-mobile {
+    background: rgba(255, 255, 255, 0.86);
+  }
+}
+
+/* ---------- Circle buttons (back, prev, next) ---------- */
+.circle-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-io);
+}
+.circle-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  transform: scale(1);
+  transition: all 0.3s ease-in-out;
+}
+.circle-button:hover::before {
+  animation: pulseBorder 1.5s ease-out infinite;
+  will-change: transform, opacity;
+}
+.circle-button:hover svg path {
+  stroke: var(--brand);
+}
+.circle-button svg path {
+  transition: stroke 0.3s var(--ease-io);
+}
+.circle-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.circle-button:disabled:hover::before {
+  animation: none;
+}
+
+/* ---------- Category list items ---------- */
+.pick-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s var(--ease-io);
+}
+.pick-item p,
+.pick-item .icon,
+.pick-item .arrow {
+  transition: all 0.3s var(--ease-io);
+}
+.pick-item .icon path,
+.pick-item .icon circle {
+  transition: stroke 0.3s ease-in-out;
+}
+.pick-item:hover .hover-gradient {
+  opacity: 0.6;
+}
+.pick-item:hover p {
+  color: var(--brand);
+}
+.pick-item:hover .arrow {
+  transform: translateX(10px);
+}
+.pick-item:hover .arrow path,
+.pick-item:hover .icon path,
+.pick-item:hover .icon circle {
+  stroke: var(--brand);
+}
+
+/* ---------- Next-story card ---------- */
+.next-story {
+  position: relative;
+  background: linear-gradient(rgba(255, 255, 255, 0.4) 20%, rgba(255, 255, 255, 0.2));
+  overflow: hidden;
+}
+.next-story .grad {
+  position: absolute;
+  inset: 10px;
+  border-radius: 9999px;
+  filter: blur(10px);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+  background: linear-gradient(226.74deg, #e3f6ef 14.97%, #c3efe2 20.41%, #fff3ea 29.94%, #ffe2cf 38.78%, #fff 46.6%, #d9f2ea 57.14%, #fff 66.33%, #fff0d6 70.41%, #e3f6ef 77.89%);
+}
+.next-story .text-place p {
+  transition: color 0.3s var(--ease-io);
+}
+.next-story svg path {
+  transition: stroke 0.3s var(--ease-io);
+}
+.next-story:hover .grad {
+  opacity: 1;
+}
+.next-story:hover .text-place p {
+  color: var(--brand);
+}
+.next-story:hover svg path {
+  stroke: var(--brand);
+}
+
+/* ---------- Sound toggle ---------- */
+.sound .dot {
+  position: absolute;
+  width: 5px;
+  height: 12px;
+  border-radius: 9999px;
+  background: #fff;
+  transform-origin: center;
+}
+.sound .dot.center {
+  position: relative;
+  transform: scale(1.1);
+}
+.sound.on .dot.l {
+  animation: moveLeft 3s ease-in-out infinite;
+}
+.sound.on .dot.r {
+  animation: moveRight 3s ease-in-out infinite;
+}
+.sound.off .dot {
+  animation: none;
+  width: 2px;
+  height: 2px;
+  opacity: 1;
+}
+
+/* ---------- Divider line used between story sections ---------- */
+.story-divider {
+  height: 1px;
+  background: linear-gradient(90deg, rgba(11, 122, 106, 0) 0%, rgba(11, 122, 106, 0.35) 30%, rgba(242, 132, 59, 0.45) 70%, rgba(242, 132, 59, 0) 100%);
+}
+
+/* Supplement card header with a soft iridescent background */
+.supp-head {
+  background: linear-gradient(90deg, #d4f1e8 0%, #fdeedd 45%, #e9f6f0 100%);
+}
+
+/* Hide scrollbar but keep scrolling */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Gradient text for the story header tabs label */
+.text-gradient {
+  background: linear-gradient(268.96deg, #0b7a6a -12.99%, #7fd6c2 124.12%, #07352f 231.11%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Title letters start hidden; GSAP reveals them */
+.letter {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

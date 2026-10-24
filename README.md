@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NeuroAtlas
 
-## Getting Started
+An interactive, animated tour of the human brain, built with **React (Next.js App Router)**, **Tailwind CSS v4** and the **GSAP core library**. The UI/UX, screen flow and animations follow the Vibrant Wellness interactive experience; the content is 100% neuroscience.
 
-First, run the development server:
+## What is inside
+
+| Screen | What it does |
+| --- | --- |
+| Preloader | Pulsing logo with three expanding rings, then fades out. |
+| Intro | Letter-by-letter title reveal, feature bullets, pulsing "Start Experience" button with letter-swap hover. |
+| Explore | SVG brain (lateral or medial view) with seven glowing hotspots and the "Explore categories" glass panel. Hovering a hotspot glows the region and shows crosshair lines. |
+| Category | The camera zooms to the region, every structure gets a labelled hotspot, and the bottom bar steps PREV / NEXT through categories. |
+| Story | A scrolling glass panel with two tabs: **Overview** (what it is, key facts, functions, what goes wrong) and **Vitamins & Nutrition** (vitamin cards with doses and the specific job each one does for that structure). A circular animated neuron window sits over the structure. |
+
+### Brain coverage (49 structures)
+
+- **Cerebral cortex**: frontal lobe, prefrontal cortex, Broca's area, sensorimotor cortex, parietal lobe, temporal lobe, Wernicke's area, occipital lobe, insula, claustrum
+- **Limbic system**: hippocampus, entorhinal cortex, amygdala, fornix, cingulate gyrus, mammillary bodies, olfactory bulb
+- **Diencephalon**: thalamus, hypothalamus, pituitary gland, pineal gland (the "third eye"), habenula, optic chiasm
+- **Basal ganglia**: striatum, globus pallidus, nucleus accumbens, subthalamic nucleus, substantia nigra, ventral tegmental area
+- **Brainstem**: midbrain, periaqueductal grey, locus coeruleus, pons, raphe nuclei, reticular formation, medulla oblongata
+- **Cerebellum**: cerebellar cortex, vermis, flocculonodular lobe, deep cerebellar nuclei
+- **Cells & support**: neurons, synapses & neurotransmitters, glial cells, corpus callosum (white matter), ventricles & CSF, choroid plexus, meninges, blood–brain barrier, circle of Willis
+
+### Lateral vs medial
+
+The header switch (and the **?** button beside it) explains the two drawings: **lateral** is the brain seen from the side (lobes, folds, cerebellum), **medial** is a cut straight down the midline that exposes the deep structures. Every story also states which view its structure is seen in.
+
+Every structure lists the vitamins that support it (B1, B2, B3, B6, B7, B9, B12, A, C, D, E, K) plus a few vitamin-like nutrients (choline, omega-3 DHA, magnesium, zinc, iron, iodine, CoQ10, lutein).
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+pnpm dev        # http://localhost:3000
+pnpm build      # production build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project layout
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+  app/            layout, globals.css (design tokens, keyframes, component CSS)
+  components/     Experience (state machine) + one component per screen element
+  data/           categories.ts + one parts-*.ts file per brain division
+  lib/            nextStory.ts (NEXT-card ordering), sound.ts (Web Audio ambience)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Changing the content
 
-## Learn More
+- Add a structure: append a `Part` object to the matching `src/data/parts-*.ts` file and list its id in `src/data/categories.ts`. Its `pos` is in the 1000×1000 SVG viewBox of `BrainSvg.tsx`.
+- Change the tour order: edit `getNextPart` in `src/lib/nextStory.ts`.
+- Change the colours: edit the tokens at the top of `src/app/globals.css` and the per-category `color` in `categories.ts`.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Educational content only; doses are general adult reference values and not medical advice.
